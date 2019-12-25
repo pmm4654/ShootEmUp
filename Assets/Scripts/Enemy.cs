@@ -9,6 +9,8 @@ public class Enemy : LivingEntity
     public enum State{Idle, Chasing, Attacking};
     State currentState;
 
+    public ParticleSystem deathEffect;
+
     NavMeshAgent pathfinder;
     Transform target;
     LivingEntity targetEntity;
@@ -50,6 +52,15 @@ public class Enemy : LivingEntity
 
     }
 
+    public override void TakeHit(float damage, Vector3 hitPoint, Vector3 hitDirection)
+    {
+        if(damage >= health)
+        {
+            Destroy(Instantiate(deathEffect.gameObject, hitPoint, Quaternion.FromToRotation(Vector3.forward, hitDirection)) as GameObject, deathEffect.main.startLifetime.constant);
+        }
+        base.TakeHit(damage, hitPoint, hitDirection);
+    }
+
     void OnTargetDeath()
     {
         hasTarget = false;
@@ -82,10 +93,10 @@ public class Enemy : LivingEntity
         float attackSpeed = 3;
         float percent = 0; // how far into the anmiation we are
 
-        skinMaterial.color = Color.Lerp(originalColor, Color.red, percent);
 
         bool hasAppliedDamage = false;
 
+        skinMaterial.color = Color.red;
         while (percent <= 1)
         {
             if(percent >= .5f && !hasAppliedDamage)
