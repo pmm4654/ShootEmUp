@@ -11,6 +11,7 @@ public class Player : LivingEntity
     PlayerController controller;
     GunController gunController;
 
+    public Crosshairs crosshairs;
     Camera viewCamera;
 
     protected override void Start()
@@ -32,7 +33,7 @@ public class Player : LivingEntity
 
         // Look input
         Ray ray = viewCamera.ScreenPointToRay(Input.mousePosition);
-        Plane groundPlane = new Plane(Vector3.up, Vector3.zero); // we need to intersect the ray with the ground plane to see where the player will be looking - so make a flat plane
+        Plane groundPlane = new Plane(Vector3.up, Vector3.up * gunController.GunHeight); // we need to intersect the ray with the ground plane to see where the player will be looking - so make a flat plane
         float rayDistance;
 
         if (groundPlane.Raycast(ray, out rayDistance)) // if ray intersects with ground plane
@@ -40,6 +41,8 @@ public class Player : LivingEntity
             Vector3 pointOfIntersection = ray.GetPoint(rayDistance);
             Debug.DrawLine(ray.origin, pointOfIntersection, Color.red);
             controller.LookAt(pointOfIntersection);
+            crosshairs.transform.position = pointOfIntersection;
+            crosshairs.DetectTargets(ray);
         }
 
         // Weapon input

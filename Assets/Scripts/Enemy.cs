@@ -28,28 +28,44 @@ public class Enemy : LivingEntity
 
     bool hasTarget;
 
+    private void Awake()
+    {
+        pathfinder = GetComponent<NavMeshAgent>();
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject != null)
+        {
+            hasTarget = true;
+            target = playerObject.transform;
+            targetEntity = target.GetComponent<LivingEntity>();
+            myCollisionRadius = GetComponent<CapsuleCollider>().radius;
+            targetCollisionRadius = target.GetComponent<CapsuleCollider>().radius;
+        }
+    }
     // Start is called before the first frame update
     protected override void Start()
     {
         base.Start();
-        pathfinder = GetComponent<NavMeshAgent>();
-        skinMaterial = GetComponent<Renderer>().material;
-        originalColor = skinMaterial.color;
 
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        if (playerObject != null)
+        if (hasTarget)
         {
             currentState = State.Chasing;
-            hasTarget = true;
-            target = playerObject.transform;
-            targetEntity = target.GetComponent<LivingEntity>();
             targetEntity.OnDeath += OnTargetDeath;
-            myCollisionRadius = GetComponent<CapsuleCollider>().radius;
-            targetCollisionRadius = target.GetComponent<CapsuleCollider>().radius;
-
             StartCoroutine(UpdatePath());
         }
 
+    }
+
+    public void SetCharacteristics(float moveSpeed, int hitsToKillPlayer, float enemyHealth, Color skinColor)
+    {
+        pathfinder.speed = moveSpeed;
+        if(hasTarget)
+        {
+            damage = Mathf.Ceil(targetEntity.startingHealth / hitsToKillPlayer);
+        }
+        startingHealth = enemyHealth;
+        skinMaterial = GetComponent<Renderer>().material;
+        skinMaterial.color = skinColor;
+        originalColor = skinColor;
     }
 
     public override void TakeHit(float damage, Vector3 hitPoint, Vector3 hitDirection)
