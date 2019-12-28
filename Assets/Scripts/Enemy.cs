@@ -72,7 +72,10 @@ public class Enemy : LivingEntity
     {
         if(damage >= health)
         {
-            Destroy(Instantiate(deathEffect.gameObject, hitPoint, Quaternion.FromToRotation(Vector3.forward, hitDirection)) as GameObject, deathEffect.main.startLifetime.constant);
+            GameObject deathEffectGameObject = deathEffect.gameObject;
+            Material deathEffectMaterial = deathEffectGameObject.GetComponent<Renderer>().sharedMaterial;
+            deathEffectMaterial.color = originalColor;
+            Destroy(Instantiate(deathEffectGameObject, hitPoint, Quaternion.FromToRotation(Vector3.forward, hitDirection)) as GameObject, deathEffect.main.startLifetime.constant);
         }
         base.TakeHit(damage, hitPoint, hitDirection);
     }
