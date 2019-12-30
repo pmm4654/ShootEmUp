@@ -17,10 +17,21 @@ public class Player : LivingEntity
     protected override void Start()
     {
         base.Start();
+    }
+
+    private void Awake()
+    {
         // assuming that the playercontroller is attached to the same game object as the player script
         controller = GetComponent<PlayerController>();
         gunController = GetComponent<GunController>();
         viewCamera = Camera.main;
+        FindObjectOfType<Spawner>().OnNewWave += OnNewWave;
+    }
+
+    void OnNewWave(int waveNumber)
+    {
+        health = startingHealth;
+        gunController.EquipGun(waveNumber - 1);
     }
 
     // Update is called once per frame
