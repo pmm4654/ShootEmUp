@@ -10,6 +10,7 @@ public class Enemy : LivingEntity
     State currentState;
 
     public ParticleSystem deathEffect;
+    public static event System.Action OnDeathStatic;
 
     NavMeshAgent pathfinder;
     Transform target;
@@ -63,16 +64,24 @@ public class Enemy : LivingEntity
             damage = Mathf.Ceil(targetEntity.startingHealth / hitsToKillPlayer);
         }
         startingHealth = enemyHealth;
-        skinMaterial = GetComponent<Renderer>().sharedMaterial;
+        skinMaterial = GetComponent<Renderer>().material;
         skinMaterial.color = skinColor;
         originalColor = skinColor;
     }
 
     public override void TakeHit(float damage, Vector3 hitPoint, Vector3 hitDirection)
     {
-        if(damage >= health)
+        AudioManager.instance.PlaySound("Impact", transform.position);
+        if(damage >= health && !dead)
         {
+            if(OnDeathStatic != null)
+            {
+                OnDeathStatic();
+            }
+            AudioManager.instance.PlaySound("EnemyDeath", transform.position);
             GameObject deathEffectGameObject = deathEffect.gameObject;
+            Material deathEffectMaterial = deathEffectGameObject.GetComponent<Renderer>().sharedMaterial;
+            deathEffectMaterial.color = originalColor;
             Destroy(Instantiate(deathEffectGameObject, hitPoint, Quaternion.FromToRotation(Vector3.forward, hitDirection)) as GameObject, deathEffect.main.startLifetime.constant);
         }
         base.TakeHit(damage, hitPoint, hitDirection);
@@ -93,6 +102,7 @@ public class Enemy : LivingEntity
             float sqrDistanceToTarget = (target.position - transform.position).sqrMagnitude;
             if (sqrDistanceToTarget < Mathf.Pow(attackDistanceThreshold + myCollisionRadius + targetCollisionRadius, 2)) {
                 nextAvailableAttackTime = Time.time + timeBetweenAttacks;
+                AudioManager.instance.PlaySound("EnemyAttack", transform.position);
                 StartCoroutine(Attack());
             }
         }

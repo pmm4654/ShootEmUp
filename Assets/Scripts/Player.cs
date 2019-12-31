@@ -54,7 +54,7 @@ public class Player : LivingEntity
             controller.LookAt(pointOfIntersection);
             crosshairs.transform.position = pointOfIntersection;
             crosshairs.DetectTargets(ray);
-            if((new Vector2(pointOfIntersection.x, pointOfIntersection.z) - new Vector2(transform.position.x, transform.position.z)).sqrMagnitude >= 1)
+            if ((new Vector2(pointOfIntersection.x, pointOfIntersection.z) - new Vector2(transform.position.x, transform.position.z)).sqrMagnitude >= 1)
                 gunController.Aim(pointOfIntersection);
             {
 
@@ -62,7 +62,7 @@ public class Player : LivingEntity
         }
 
         // Weapon input
-        if(Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0))
         {
             gunController.OnTriggerHold();
         }
@@ -70,10 +70,20 @@ public class Player : LivingEntity
         {
             gunController.OnTriggerRelease();
         }
-        if(Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R))
         {
             gunController.Reload();
         }
-
+        if(transform.position.y <= -10)
+        {
+            TakeDamage(health);
+        }
     }
+
+    public override void Die()
+    {
+        AudioManager.instance.PlaySound("PlayerDeath", transform.position);
+        base.Die();
+    }
+
 }
